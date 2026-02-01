@@ -2,7 +2,6 @@ using Application.Common.Interfaces;
 using Application.Products.DTOs;
 using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Products.Queries.GetProductById;
 
@@ -10,21 +9,18 @@ public record GetProductByIdQuery(int Id) : IRequest<ProductDetailDto?>;
 
 public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, ProductDetailDto?>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public GetProductByIdQueryHandler(INorthwindDbContext context, IMapper mapper)
+    public GetProductByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
     public async Task<ProductDetailDto?> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
     {
-        var product = await _context.Products
-            .Include(p => p.Category)
-            .Include(p => p.Supplier)
-            .FirstOrDefaultAsync(p => p.ProductId == request.Id, cancellationToken);
+        var product = await _unitOfWork.Products.GetWithDetailsAsync(request.Id, cancellationToken);
 
         if (product == null)
             return null;

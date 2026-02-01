@@ -24,18 +24,16 @@ public class GetAllOrdersResult
 
 public class GetAllOrdersQueryHandler : IRequestHandler<GetAllOrdersQuery, GetAllOrdersResult>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public GetAllOrdersQueryHandler(INorthwindDbContext context)
+    public GetAllOrdersQueryHandler(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<GetAllOrdersResult> Handle(GetAllOrdersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Orders
-            .Include(o => o.Customer)
-            .AsQueryable();
+        var query = _unitOfWork.Orders.GetQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.CustomerId))
             query = query.Where(o => o.CustomerId == request.CustomerId);
@@ -52,6 +50,7 @@ public class GetAllOrdersQueryHandler : IRequestHandler<GetAllOrdersQuery, GetAl
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
+            .Include(o => o.Customer)
             .OrderByDescending(o => o.OrderDate)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)

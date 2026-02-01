@@ -27,18 +27,18 @@ public class GetAllProductsResult
 
 public class GetAllProductsQueryHandler : IRequestHandler<GetAllProductsQuery, GetAllProductsResult>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public GetAllProductsQueryHandler(INorthwindDbContext context, IMapper mapper)
+    public GetAllProductsQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
     public async Task<GetAllProductsResult> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Products.AsQueryable();
+        var query = _unitOfWork.Products.GetQueryable();
 
         // Apply filters
         if (request.CategoryId.HasValue)

@@ -1,7 +1,6 @@
 using Application.Categories.DTOs;
 using Application.Common.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Categories.Queries.GetCategoryById;
 
@@ -9,18 +8,16 @@ public record GetCategoryByIdQuery(int Id) : IRequest<CategoryDetailDto?>;
 
 public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery, CategoryDetailDto?>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public GetCategoryByIdQueryHandler(INorthwindDbContext context)
+    public GetCategoryByIdQueryHandler(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<CategoryDetailDto?> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
     {
-        var category = await _context.Categories
-            .Include(c => c.Products)
-            .FirstOrDefaultAsync(c => c.CategoryId == request.Id, cancellationToken);
+        var category = await _unitOfWork.Categories.GetWithProductsAsync(request.Id, cancellationToken);
 
         if (category == null)
             return null;

@@ -1,7 +1,6 @@
 using Application.Common.Interfaces;
 using Application.Products.DTOs;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Products.Commands.UpdateProduct;
 
@@ -9,17 +8,16 @@ public record UpdateProductCommand(int Id, UpdateProductDto Dto) : IRequest<bool
 
 public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, bool>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateProductCommandHandler(INorthwindDbContext context)
+    public UpdateProductCommandHandler(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<bool> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Products
-            .FirstOrDefaultAsync(p => p.ProductId == request.Id, cancellationToken);
+        var entity = await _unitOfWork.Products.GetByIdAsync(request.Id, cancellationToken);
 
         if (entity == null)
             return false;
@@ -34,7 +32,8 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         entity.ReorderLevel = request.Dto.ReorderLevel;
         entity.Discontinued = request.Dto.Discontinued;
 
-        await _context.SaveChangesAsync(cancellationToken);
+        _unitOfWork.Products.Update(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return true;
     }

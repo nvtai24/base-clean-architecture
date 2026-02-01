@@ -1,7 +1,6 @@
 using Application.Common.Interfaces;
 using Application.Orders.DTOs;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Orders.Queries.GetOrderById;
 
@@ -9,22 +8,16 @@ public record GetOrderByIdQuery(int Id) : IRequest<OrderDetailDto?>;
 
 public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, OrderDetailDto?>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public GetOrderByIdQueryHandler(INorthwindDbContext context)
+    public GetOrderByIdQueryHandler(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<OrderDetailDto?> Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
     {
-        var order = await _context.Orders
-            .Include(o => o.Customer)
-            .Include(o => o.Employee)
-            .Include(o => o.ShipViaNavigation)
-            .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Product)
-            .FirstOrDefaultAsync(o => o.OrderId == request.Id, cancellationToken);
+        var order = await _unitOfWork.Orders.GetWithDetailsAsync(request.Id, cancellationToken);
 
         if (order == null)
             return null;

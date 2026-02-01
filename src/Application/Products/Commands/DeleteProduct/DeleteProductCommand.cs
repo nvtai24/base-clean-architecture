@@ -1,6 +1,5 @@
 using Application.Common.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Products.Commands.DeleteProduct;
 
@@ -8,23 +7,22 @@ public record DeleteProductCommand(int Id) : IRequest<bool>;
 
 public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, bool>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteProductCommandHandler(INorthwindDbContext context)
+    public DeleteProductCommandHandler(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<bool> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Products
-            .FirstOrDefaultAsync(p => p.ProductId == request.Id, cancellationToken);
+        var entity = await _unitOfWork.Products.GetByIdAsync(request.Id, cancellationToken);
 
         if (entity == null)
             return false;
 
-        _context.Products.Remove(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        _unitOfWork.Products.Delete(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return true;
     }

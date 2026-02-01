@@ -11,18 +11,18 @@ public record GetAllCategoriesQuery : IRequest<List<CategoryDto>>;
 
 public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, List<CategoryDto>>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public GetAllCategoriesQueryHandler(INorthwindDbContext context, IMapper mapper)
+    public GetAllCategoriesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
     public async Task<List<CategoryDto>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Categories
+        return await _unitOfWork.Categories.GetQueryable()
             .OrderBy(c => c.CategoryName)
             .ProjectTo<CategoryDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);

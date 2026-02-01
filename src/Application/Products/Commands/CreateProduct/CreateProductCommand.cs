@@ -9,11 +9,11 @@ public record CreateProductCommand(CreateProductDto Dto) : IRequest<int>;
 
 public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, int>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateProductCommandHandler(INorthwindDbContext context)
+    public CreateProductCommandHandler(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<int> Handle(CreateProductCommand request, CancellationToken cancellationToken)
@@ -31,8 +31,8 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
             Discontinued = request.Dto.Discontinued
         };
 
-        _context.Products.Add(entity);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.Products.AddAsync(entity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.ProductId;
     }

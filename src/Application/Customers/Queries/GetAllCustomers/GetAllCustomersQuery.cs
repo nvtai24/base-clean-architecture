@@ -25,18 +25,18 @@ public class GetAllCustomersResult
 
 public class GetAllCustomersQueryHandler : IRequestHandler<GetAllCustomersQuery, GetAllCustomersResult>
 {
-    private readonly INorthwindDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public GetAllCustomersQueryHandler(INorthwindDbContext context, IMapper mapper)
+    public GetAllCustomersQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
 
     public async Task<GetAllCustomersResult> Handle(GetAllCustomersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Customers.AsQueryable();
+        var query = _unitOfWork.Customers.GetQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.Country))
             query = query.Where(c => c.Country == request.Country);
