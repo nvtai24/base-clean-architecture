@@ -19,10 +19,6 @@ public static class DependencyInjection
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(NorthwindDbContext).Assembly.FullName)));
 
-        // Register INorthwindDbContext (for backward compatibility)
-        services.AddScoped<INorthwindDbContext>(provider =>
-            provider.GetRequiredService<NorthwindDbContext>());
-
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

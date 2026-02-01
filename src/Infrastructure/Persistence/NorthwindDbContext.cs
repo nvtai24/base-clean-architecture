@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Application.Common.Interfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence;
 
-public partial class NorthwindDbContext : DbContext, INorthwindDbContext
+public partial class NorthwindDbContext : DbContext
 {
     public NorthwindDbContext(DbContextOptions<NorthwindDbContext> options)
         : base(options)
