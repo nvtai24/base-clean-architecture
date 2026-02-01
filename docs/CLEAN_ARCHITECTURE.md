@@ -38,13 +38,13 @@ The main goal is to create systems that are:
 
 ```
         ┌──────────────────────────────────────────────────┐
-        │                 Presentation                      │
+        │                 Presentation                     │
         │    (Controllers, Views, API Endpoints)           │
         │  ┌──────────────────────────────────────────┐    │
-        │  │            Infrastructure                 │    │
+        │  │            Infrastructure                │    │
         │  │    (DB, External APIs, File System)      │    │
         │  │  ┌──────────────────────────────────┐    │    │
-        │  │  │          Application              │    │    │
+        │  │  │          Application             │    │    │
         │  │  │    (Use Cases, Business Logic)   │    │    │
         │  │  │  ┌──────────────────────────┐    │    │    │
         │  │  │  │         Domain           │    │    │    │
